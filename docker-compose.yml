@@ -1,0 +1,97 @@
+services:
+  inventory-db:
+    container_name: inventory_db
+    image: postgres:16
+    environment:
+      POSTGRES_DB: inventory_db
+      POSTGRES_USER: inventory
+      POSTGRES_PASSWORD: inventory
+    restart: unless-stopped
+    ports:
+      - "5433:5432"
+    volumes:
+      - inventory-data:/var/lib/postgresql/data
+    networks:
+      - inventory-network
+  inventory-service:
+    build: ./inventory-service
+    image: inventory-service
+    container_name: inventory-service
+    restart: unless-stopped
+    depends_on:
+      - inventory-db
+    ports:
+      - "8001:80"
+    volumes:
+      - ./inventory-service:/var/www/html
+    networks:
+      - inventory-network
+  order-db:
+    container_name: order_db
+    image: postgres:16
+    environment:
+      POSTGRES_DB: order_db
+      POSTGRES_USER: order
+      POSTGRES_PASSWORD: order
+    restart: unless-stopped
+    ports:
+      - "5434:5432"
+    volumes:
+        - order-data:/var/lib/postgresql/data
+    networks:
+      - order-network
+  order-service:
+    build: ./order-service
+    image: order-service
+    container_name: order-service
+    restart: unless-stopped
+    depends_on:
+      - order-db
+    ports:
+      - "8002:80"
+    volumes:
+      - ./order-service:/var/www/html
+    networks:
+      - order-network
+  purchase-db:
+    container_name: purchase_db
+    image: postgres:16
+    environment:
+      POSTGRES_DB: purchase_db
+      POSTGRES_USER: purchase
+      POSTGRES_PASSWORD: purchase
+    restart: unless-stopped
+    ports:
+      - "5435:5432"
+    volumes:
+        - purchase-data:/var/lib/postgresql/data
+    networks:
+      - purchase-network
+  purchase-service:
+    build: ./purchase-service
+    image: purchase-service
+    container_name: purchase-service
+    restart: unless-stopped
+    depends_on:
+      - purchase-db
+    ports:
+      - "8003:80"
+    volumes:
+      - ./purchase-service:/var/www/html
+    networks:
+      - purchase-network
+volumes:
+  inventory-data:
+  order-data:
+  purchase-data:
+networks:
+  inventory-network:
+    driver: bridge
+    name: inventory-network
+  order-network:
+    driver: bridge
+    name: order-network
+  purchase-network:
+    driver: bridge
+    name: purchase-network
+  
